@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.111" fx:controller="songlib.Controller">
+   <children>
+      <Pane layoutX="-198.0" layoutY="-261.0" prefHeight="546.0" prefWidth="611.0" />
+   </children>
+</AnchorPane>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="songlib.Controller">
+   <children>
+      <Pane layoutX="-121.0" layoutY="-126.0" prefHeight="530.0" prefWidth="635.0">
+         <children>
+            <SplitPane dividerPositions="0.5" layoutX="121.0" layoutY="126.0" orientation="VERTICAL" prefHeight="404.0" prefWidth="514.0">
+              <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                     <children>
+                        <ListView fx:id="listView" layoutY="-1.0" prefHeight="200.0" prefWidth="233.0" />
+                        <Label layoutX="324.0" layoutY="14.0" text="Song Details" />
+                        <Label layoutX="238.0" layoutY="37.0" text="Name:" />
+                        <Label layoutX="238.0" layoutY="72.0" text="Artist:" />
+                        <Label layoutX="238.0" layoutY="109.0" text="Album:" />
+                        <Label layoutX="242.0" layoutY="150.0" text="Year:" />
+                     </children>
+                  </AnchorPane>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                     <children>
+                        <Button fx:id="addBtn" layoutX="32.0" layoutY="157.0" mnemonicParsing="false" text="Add" />
+                        <Button fx:id="deleteBtn" layoutX="226.0" layoutY="156.0" mnemonicParsing="false" text="Delete" />
+                        <Button fx:id="editBtn" layoutX="407.0" layoutY="157.0" mnemonicParsing="false" text="Edit" />
+                        <TextField fx:id="songNameTxt" layoutX="31.0" layoutY="50.0" text="Song Name" />
+                        <TextField fx:id="albumTxt" layoutX="32.0" layoutY="112.0" text="Album" />
+                        <TextField fx:id="artistTxt" layoutX="322.0" layoutY="51.0" text="Artist" />
+                        <TextField fx:id="yearTxt" layoutX="321.0" layoutY="112.0" text="Year" />
+                        <Label layoutX="31.0" layoutY="34.0" text="Song Name:" />
+                        <Label layoutX="33.0" layoutY="96.0" text="Album:" />
+                        <Label layoutX="322.0" layoutY="96.0" text="Year:" />
+                        <Label layoutX="319.0" layoutY="34.0" text="Artist:" />
+                     </children>
+                  </AnchorPane>
+              </items>
+            </SplitPane>
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>
