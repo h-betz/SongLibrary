@@ -26,7 +26,6 @@ public class SongLib extends Application {
 		primaryStage.setScene(scene);
 		primaryStage.sizeToScene();
 		primaryStage.show();
-		//this.controller = new Controller(scene);
 	}
 	
 	public static void main(String[] args) {

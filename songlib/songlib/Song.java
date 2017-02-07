@@ -1,6 +1,8 @@
 package songlib;
 
-public class Song {
+import java.io.Serializable;
+
+public class Song implements Serializable {
 
 	private String name;
 	private String artist;
