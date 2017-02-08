@@ -25,6 +25,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 
@@ -39,6 +40,7 @@ public class Controller implements javafx.fxml.Initializable {
 	 * Controller variables such as data structures and GUI components
 	 */
 	private HashMap<String, Song> map;
+	private HashMap<Integer, Song> mapping;
 	private ObservableList<String> songs;
 	private ArrayList<String> list;
 	
@@ -58,11 +60,20 @@ public class Controller implements javafx.fxml.Initializable {
 	private TextField yearTxt;
 	@FXML
 	private ListView<String> listView;
+	@FXML
+	private Label songLabel;
+	@FXML
+	private Label artistLabel;
+	@FXML
+	private Label albumLabel;
+	@FXML
+	private Label yearLabel;
 	
 	
 	@Override	
 	public void initialize(URL location, ResourceBundle resources) {	
 		map = new HashMap<String, Song>();
+		mapping = new HashMap<Integer, Song>();
 		ArrayList<String> songs = new ArrayList<>();
 		loadFile();
 		loadListData();
@@ -71,8 +82,8 @@ public class Controller implements javafx.fxml.Initializable {
 		listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
 		    @Override
 		    public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-		        System.out.println("ListView selection changed from oldValue = " 
-		                + oldValue + " to newValue = " + newValue);
+		        int index = listView.getSelectionModel().getSelectedIndex();
+		        displayItemDetails(index);
 		    }
 		});
 		
@@ -140,12 +151,12 @@ public class Controller implements javafx.fxml.Initializable {
 			if (year != null && !year.equals("")) {
 				song.setYear(year);
 			}
-			if (map.containsKey(song.getName()+song.getArtist())) {
+			if (songExists(song)) {
 				//Song and artist combo already exist, prompt error message
 				return;
 			} else {
 				map.put(song.getName()+song.getArtist(), song);
-				insertInOrder(songName);
+				insertInOrder(song);
 				saveFile();
 			}
 			
@@ -153,20 +164,54 @@ public class Controller implements javafx.fxml.Initializable {
 	}
 	
 	/**
+	 * Return true if song exists in our dataset, false otherwise
+	 * @param song
+	 * @return
+	 */
+	public boolean songExists(Song song) {
+		for (Map.Entry<Integer, Song> entry : mapping.entrySet()) {
+			Song s = entry.getValue();
+			if (s.getName().equals(song.getName()) && s.getArtist().equals(song.getArtist())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Display song details about the selected song
+	 * @param index
+	 */
+	public void displayItemDetails(int index) {
+		Song song = mapping.get(index);
+		songLabel.setText(song.getName());
+		artistLabel.setText(song.getArtist());
+		if (song.getAlbum() != null) {
+			albumLabel.setText(song.getAlbum());
+		}
+		if (song.getYear() != null) {
+			yearLabel.setText(song.getYear());
+		}
+	}
+	
+	/**
 	 * Insert new song in alphabetical order
 	 * @param song
 	 */
-	private void insertInOrder(String song) {
+	private void insertInOrder(Song song) {
+		String name = song.getName();
 		int index = 0;
 		ObservableList<String> items = listView.getItems();
 		for (String s : items) {
-			int result = song.compareToIgnoreCase(s);
+			int result = name.compareToIgnoreCase(s);
 			if (result < 0) {
 				break;
 			}
 			index++;
 		}
-		listView.getItems().add(index, song);
+		listView.getItems().add(index, name);
+		list.add(index, name);
+		mapping.put(index, song);
 	}
 	
 	/**
@@ -177,7 +222,7 @@ public class Controller implements javafx.fxml.Initializable {
 	private void loadListData() {
 		songs = FXCollections.observableArrayList();
 		list = new ArrayList<>();
-		for (Entry<String, Song> entry : map.entrySet()) {
+		for (Entry<Integer, Song> entry : mapping.entrySet()) {
 			Song song = entry.getValue();
 			list.add(song.getName());
 		}
@@ -193,7 +238,7 @@ public class Controller implements javafx.fxml.Initializable {
 		ObjectOutputStream out;
 		try {
 			out = new ObjectOutputStream(new FileOutputStream("songlib/data.ser"));
-			out.writeObject(map);
+			out.writeObject(mapping);
 			out.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -211,7 +256,7 @@ public class Controller implements javafx.fxml.Initializable {
 				FileInputStream fis = new FileInputStream("songlib/data.ser");
 				ObjectInputStream ois;
 				ois = new ObjectInputStream(fis);
-				map = (HashMap<String, Song>) ois.readObject();
+				mapping = (HashMap<Integer, Song>) ois.readObject();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

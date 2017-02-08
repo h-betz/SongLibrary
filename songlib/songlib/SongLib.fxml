@@ -22,6 +22,10 @@
                         <Label layoutX="238.0" layoutY="72.0" text="Artist:" />
                         <Label layoutX="238.0" layoutY="109.0" text="Album:" />
                         <Label layoutX="242.0" layoutY="150.0" text="Year:" />
+                        <Label fx:id="songLabel" layoutX="295.0" layoutY="37.0" prefHeight="16.0" prefWidth="153.0" text="" />
+                        <Label fx:id="artistLabel" layoutX="295.0" layoutY="72.0" prefHeight="16.0" prefWidth="153.0" text="" />
+                        <Label fx:id="albumLabel" layoutX="295.0" layoutY="109.0" prefHeight="16.0" prefWidth="161.0" text="" />
+                        <Label fx:id="yearLabel" layoutX="295.0" layoutY="150.0" prefHeight="16.0" prefWidth="127.0" text="" />
                      </children>
                   </AnchorPane>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
@@ -29,10 +33,10 @@
                         <Button fx:id="addBtn" layoutX="32.0" layoutY="157.0" mnemonicParsing="false" text="Add" />
                         <Button fx:id="deleteBtn" layoutX="226.0" layoutY="156.0" mnemonicParsing="false" text="Delete" />
                         <Button fx:id="editBtn" layoutX="407.0" layoutY="157.0" mnemonicParsing="false" text="Edit" />
-                        <TextField fx:id="songNameTxt" layoutX="31.0" layoutY="50.0" text="Song Name" />
-                        <TextField fx:id="albumTxt" layoutX="32.0" layoutY="112.0" text="Album" />
-                        <TextField fx:id="artistTxt" layoutX="322.0" layoutY="51.0" text="Artist" />
-                        <TextField fx:id="yearTxt" layoutX="321.0" layoutY="112.0" text="Year" />
+                        <TextField fx:id="songNameTxt" layoutX="31.0" layoutY="50.0" text="" />
+                        <TextField fx:id="albumTxt" layoutX="32.0" layoutY="112.0" text="" />
+                        <TextField fx:id="artistTxt" layoutX="322.0" layoutY="51.0" text="" />
+                        <TextField fx:id="yearTxt" layoutX="321.0" layoutY="112.0" text="" />
                         <Label layoutX="31.0" layoutY="34.0" text="Song Name:" />
                         <Label layoutX="33.0" layoutY="96.0" text="Album:" />
                         <Label layoutX="322.0" layoutY="96.0" text="Year:" />
