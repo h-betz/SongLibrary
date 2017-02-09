@@ -10,14 +10,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
-import javax.swing.JOptionPane;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType; 
 
@@ -159,10 +155,7 @@ public class Controller implements javafx.fxml.Initializable {
 		String context = "Song name: " + songName + "\nArtist: " + artist + "\nAlbum: " + album + "\nYear: " + year;
 		if (songName == null || songName.equals("") || artist == null || artist.equals("")) {
 			//Error prompt
-			songNameTxt.setText("");
-			artistTxt.setText("");
-			albumTxt.setText("");
-			yearTxt.setText("");
+			emptyValueError();
 			return;
 		} else if (!oldName.equals(songName)) {
 			//Song name changed
@@ -238,6 +231,7 @@ public class Controller implements javafx.fxml.Initializable {
 		//Add songs to list as long as name and artist are provided and as long as song doesn't already exist
 		if (songName == null || songName.equals("") || artist == null || artist.equals("")) {
 			//Error prompt
+			emptyValueError();
 			return;
 		} else {
 			Song song = new Song();
@@ -328,6 +322,9 @@ public class Controller implements javafx.fxml.Initializable {
 		}
 		listView.getItems().add(index, name);
 		songList.add(index, song);
+		listView.getSelectionModel().select(index);
+		/*index = listView.getSelectionModel().getSelectedIndex();
+		displayItemDetails(index);*/
 	}
 	
 	/**
@@ -365,12 +362,23 @@ public class Controller implements javafx.fxml.Initializable {
 	}
 	
 	/**
+	 * Display error message if user did not specify a song name or artist name
+	 */
+	private void emptyValueError() {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("Error");
+		alert.setHeaderText("Could not apply changes.");
+		alert.setContentText("Both song name and artist name must be specified.");
+		alert.showAndWait();
+	}
+	
+	/**
 	 * Display error message for when user-artist combo exists already
 	 */
 	private void existenceError() {
 		Alert alert = new Alert(AlertType.ERROR);
 		alert.setTitle("Error");
-		alert.setHeaderText("Could not apply change.");
+		alert.setHeaderText("Could not apply changes.");
 		alert.setContentText("This song already exists!");
 		alert.showAndWait();
 		songNameTxt.setText("");
