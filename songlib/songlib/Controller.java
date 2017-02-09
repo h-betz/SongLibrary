@@ -39,10 +39,10 @@ public class Controller implements javafx.fxml.Initializable {
 	/**
 	 * Controller variables such as data structures and GUI components
 	 */
-	private HashMap<String, Song> map;
-	private HashMap<Integer, Song> mapping;
 	private ObservableList<String> songs;
-	private ArrayList<String> list;
+	private ArrayList<Song> songList;
+	//private ArrayList<String> list;
+	int itemIndex;
 	
 	@FXML
 	private Button addBtn;
@@ -69,11 +69,12 @@ public class Controller implements javafx.fxml.Initializable {
 	@FXML
 	private Label yearLabel;
 	
-	
+	/**
+	 * Add listeners to buttons and listview items, initialize data structures, load data from file, and set up display
+	 */
 	@Override	
 	public void initialize(URL location, ResourceBundle resources) {	
-		map = new HashMap<String, Song>();
-		mapping = new HashMap<Integer, Song>();
+		songList = new ArrayList<Song>();
 		ArrayList<String> songs = new ArrayList<>();
 		loadFile();
 		loadListData();
@@ -82,6 +83,7 @@ public class Controller implements javafx.fxml.Initializable {
 		listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
 		    @Override
 		    public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+		    	itemIndex = listView.getSelectionModel().getSelectedIndex();
 		        int index = listView.getSelectionModel().getSelectedIndex();
 		        displayItemDetails(index);
 		    }
@@ -107,7 +109,14 @@ public class Controller implements javafx.fxml.Initializable {
 		editBtn.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 		    public void handle(ActionEvent e) {
-		    	handleEdit();
+				if (editBtn.getText().equals("Edit")) {
+					editBtn.setText("Submit");
+					setupEdit();
+				} else {
+					editBtn.setText("Edit");
+					handleEdit(listView.getSelectionModel().getSelectedIndex());
+				}
+		    	
 		    }
 		});
 	}
@@ -122,8 +131,75 @@ public class Controller implements javafx.fxml.Initializable {
 	/**
 	 * Method to handle song edits
 	 */
-	public void handleEdit() {
-		
+	public void handleEdit(int index) {
+		Song song = songList.get(index);
+		String oldName = song.getName();
+		String oldArtist = song.getArtist();
+		String songName = songNameTxt.getText();
+		String artist = artistTxt.getText();
+		String album = albumTxt.getText();
+		String year = yearTxt.getText();
+		song.setAlbum(album);
+		song.setYear(year);
+		Song tempSong = new Song();
+		tempSong.setArtist(artist);
+		tempSong.setName(songName);
+		if (songName == null || songName.equals("") || artist == null || artist.equals("")) {
+			//Error prompt
+			songNameTxt.setText("");
+			artistTxt.setText("");
+			albumTxt.setText("");
+			yearTxt.setText("");
+			return;
+		} else if (!oldName.equals(songName)) {
+			//Song name changed
+			if (!oldArtist.equals(artist)) {
+				if (songExists(tempSong)) {
+					//prompt error
+					return;
+				} else {
+					//Song doesn't exist, add to list
+					song.setArtist(artist);
+					song.setName(songName);
+					listView.getItems().remove(index);
+					songList.remove(index);
+					insertInOrder(song);
+					saveFile();
+				}
+			} else {
+				if (songExists(tempSong)) {
+					//prompt error
+					return;
+				} else {
+					//Song doesn't exist, add to list
+					song.setName(songName);
+					listView.getItems().remove(index);
+					songList.remove(index);
+					insertInOrder(song);
+					saveFile();
+				}
+			}
+		} else if (!oldArtist.equals(artist)) {
+			//Artist name changed, but song name did not
+			if (songExists(tempSong)) {
+				//prompt error
+				return;
+			} else {
+				//Song doesn't exist, add to list
+				song.setArtist(artist);
+				songList.set(index, song);
+				saveFile();
+			}
+		} else {
+			//Song name and artist did not change
+			songList.set(index, song);
+			saveFile();
+		}
+		songNameTxt.setText("");
+		artistTxt.setText("");
+		albumTxt.setText("");
+		yearTxt.setText("");
+		displayItemDetails(itemIndex);
 	}
 	
 	/**
@@ -136,7 +212,6 @@ public class Controller implements javafx.fxml.Initializable {
 		String artist = artistTxt.getText();
 		String album = albumTxt.getText();
 		String year = yearTxt.getText();
-		
 		//Add songs to list as long as name and artist are provided and as long as song doesn't already exist
 		if (songName == null || songName.equals("") || artist == null || artist.equals("")) {
 			//Error prompt
@@ -155,12 +230,14 @@ public class Controller implements javafx.fxml.Initializable {
 				//Song and artist combo already exist, prompt error message
 				return;
 			} else {
-				map.put(song.getName()+song.getArtist(), song);
 				insertInOrder(song);
 				saveFile();
 			}
-			
 		}
+		songNameTxt.setText("");
+		artistTxt.setText("");
+		albumTxt.setText("");
+		yearTxt.setText("");
 	}
 	
 	/**
@@ -169,8 +246,7 @@ public class Controller implements javafx.fxml.Initializable {
 	 * @return
 	 */
 	public boolean songExists(Song song) {
-		for (Map.Entry<Integer, Song> entry : mapping.entrySet()) {
-			Song s = entry.getValue();
+		for (Song s : songList) {
 			if (s.getName().equals(song.getName()) && s.getArtist().equals(song.getArtist())) {
 				return true;
 			}
@@ -179,18 +255,33 @@ public class Controller implements javafx.fxml.Initializable {
 	}
 	
 	/**
+	 * Fill edit fields with song details so user knows what to change
+	 */
+	public void setupEdit() {
+		Song song = songList.get(itemIndex);
+		songNameTxt.setText(song.getName());
+		albumTxt.setText(song.getAlbum());
+		artistTxt.setText(song.getArtist());
+		yearTxt.setText(song.getYear());
+	}
+	
+	/**
 	 * Display song details about the selected song
 	 * @param index
 	 */
 	public void displayItemDetails(int index) {
-		Song song = mapping.get(index);
+		Song song = songList.get(index);
 		songLabel.setText(song.getName());
 		artistLabel.setText(song.getArtist());
 		if (song.getAlbum() != null) {
 			albumLabel.setText(song.getAlbum());
+		} else {
+			albumLabel.setText("");
 		}
 		if (song.getYear() != null) {
 			yearLabel.setText(song.getYear());
+		} else {
+			yearLabel.setText("");
 		}
 	}
 	
@@ -210,8 +301,7 @@ public class Controller implements javafx.fxml.Initializable {
 			index++;
 		}
 		listView.getItems().add(index, name);
-		list.add(index, name);
-		mapping.put(index, song);
+		songList.add(index, song);
 	}
 	
 	/**
@@ -221,9 +311,8 @@ public class Controller implements javafx.fxml.Initializable {
 	 */
 	private void loadListData() {
 		songs = FXCollections.observableArrayList();
-		list = new ArrayList<>();
-		for (Entry<Integer, Song> entry : mapping.entrySet()) {
-			Song song = entry.getValue();
+		ArrayList<String> list = new ArrayList<>();
+		for (Song song : songList) {
 			list.add(song.getName());
 		}
 		Collections.sort(list);
@@ -238,7 +327,7 @@ public class Controller implements javafx.fxml.Initializable {
 		ObjectOutputStream out;
 		try {
 			out = new ObjectOutputStream(new FileOutputStream("songlib/data.ser"));
-			out.writeObject(mapping);
+			out.writeObject(songList);
 			out.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -256,7 +345,7 @@ public class Controller implements javafx.fxml.Initializable {
 				FileInputStream fis = new FileInputStream("songlib/data.ser");
 				ObjectInputStream ois;
 				ois = new ObjectInputStream(fis);
-				mapping = (HashMap<Integer, Song>) ois.readObject();
+				songList = (ArrayList<Song>) ois.readObject();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
