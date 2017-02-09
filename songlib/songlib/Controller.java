@@ -13,8 +13,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
+
+import javax.swing.JOptionPane;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType; 
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -25,6 +30,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -139,11 +145,18 @@ public class Controller implements javafx.fxml.Initializable {
 		String artist = artistTxt.getText();
 		String album = albumTxt.getText();
 		String year = yearTxt.getText();
+		if (album == null) {
+			album = "";
+		}
+		if (year == null) {
+			year = "";
+		}
 		song.setAlbum(album);
 		song.setYear(year);
 		Song tempSong = new Song();
 		tempSong.setArtist(artist);
 		tempSong.setName(songName);
+		String context = "Song name: " + songName + "\nArtist: " + artist + "\nAlbum: " + album + "\nYear: " + year;
 		if (songName == null || songName.equals("") || artist == null || artist.equals("")) {
 			//Error prompt
 			songNameTxt.setText("");
@@ -156,39 +169,48 @@ public class Controller implements javafx.fxml.Initializable {
 			if (!oldArtist.equals(artist)) {
 				if (songExists(tempSong)) {
 					//prompt error
+					existenceError();
 					return;
 				} else {
 					//Song doesn't exist, add to list
-					song.setArtist(artist);
-					song.setName(songName);
-					listView.getItems().remove(index);
-					songList.remove(index);
-					insertInOrder(song);
-					saveFile();
+					if (confirmChanges(context)) {
+						song.setArtist(artist);
+						song.setName(songName);
+						listView.getItems().remove(index);
+						songList.remove(index);
+						insertInOrder(song);
+						saveFile();
+					}
 				}
 			} else {
 				if (songExists(tempSong)) {
 					//prompt error
+					existenceError();
 					return;
 				} else {
 					//Song doesn't exist, add to list
-					song.setName(songName);
-					listView.getItems().remove(index);
-					songList.remove(index);
-					insertInOrder(song);
-					saveFile();
+					if (confirmChanges(context)) {
+						song.setName(songName);
+						listView.getItems().remove(index);
+						songList.remove(index);
+						insertInOrder(song);
+						saveFile();
+					}
 				}
 			}
 		} else if (!oldArtist.equals(artist)) {
 			//Artist name changed, but song name did not
 			if (songExists(tempSong)) {
 				//prompt error
+				existenceError();
 				return;
 			} else {
 				//Song doesn't exist, add to list
-				song.setArtist(artist);
-				songList.set(index, song);
-				saveFile();
+				if (confirmChanges(context)) {
+					song.setArtist(artist);
+					songList.set(index, song);
+					saveFile();
+				}
 			}
 		} else {
 			//Song name and artist did not change
@@ -212,6 +234,7 @@ public class Controller implements javafx.fxml.Initializable {
 		String artist = artistTxt.getText();
 		String album = albumTxt.getText();
 		String year = yearTxt.getText();
+		String context = "Song name: " + songName + "\nArtist: " + artist + "\nAlbum: " + album + "\nYear: " + year;
 		//Add songs to list as long as name and artist are provided and as long as song doesn't already exist
 		if (songName == null || songName.equals("") || artist == null || artist.equals("")) {
 			//Error prompt
@@ -228,10 +251,13 @@ public class Controller implements javafx.fxml.Initializable {
 			}
 			if (songExists(song)) {
 				//Song and artist combo already exist, prompt error message
+				existenceError();
 				return;
 			} else {
-				insertInOrder(song);
-				saveFile();
+				if (confirmChanges(context)) {
+					insertInOrder(song);
+					saveFile();
+				}
 			}
 		}
 		songNameTxt.setText("");
@@ -321,6 +347,39 @@ public class Controller implements javafx.fxml.Initializable {
 	}
 	
 	/**
+	 * Return user validation
+	 */
+	private boolean confirmChanges(String context) {
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle("Confirm Changes");
+		alert.setHeaderText("Are you sure you want to apply these changes?");
+		alert.setContentText(context);
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.get() == ButtonType.OK) {
+		    // ok was pressed.
+			return true;
+		} else {
+		    // cancel might have been pressed.
+			return false;
+		}
+	}
+	
+	/**
+	 * Display error message for when user-artist combo exists already
+	 */
+	private void existenceError() {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("Error");
+		alert.setHeaderText("Could not apply change.");
+		alert.setContentText("This song already exists!");
+		alert.showAndWait();
+		songNameTxt.setText("");
+		artistTxt.setText("");
+		albumTxt.setText("");
+		yearTxt.setText("");
+	}
+	
+	/**
 	 * Save data to a file
 	 */
 	private void saveFile() {
@@ -346,6 +405,7 @@ public class Controller implements javafx.fxml.Initializable {
 				ObjectInputStream ois;
 				ois = new ObjectInputStream(fis);
 				songList = (ArrayList<Song>) ois.readObject();
+				ois.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
